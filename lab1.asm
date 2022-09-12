@@ -33,30 +33,30 @@ mov ebx, 10;
  
 continueDIV:
  
-div  ebx; деление нашего числа на 10 
-push edx; помещение остатка в стек(последней цифры числа)
-inc  ecx; повышение счетчика ecx(количества цифр)
+    div  ebx 
+    push edx
+    inc  ecx
  
-xor edx, edx ; обнуляем регистр
+    xor edx, edx 
  
-cmp  eax, 0; проверка целой части числа(== 0?)
-jne continueDIV; если не равно 0 то цикл
+    cmp  eax, 0
+    jne continueDIV
  
 fromStek:
-pop edx;
-mov [n]   , edx
-add [n]   , byte 48
-mov [buff], ecx ; запоминаем текущее количество итераций, так как , далее выводим символ и необходимо использовать регистр ecx
+    pop edx;
+    mov [n], edx
+    add [n], byte 48
+    mov [buff], ecx 
  
-mov edx, 1  ; вывод остатков(числа)
-mov ecx, n
-mov ebx, 1
-mov eax, 4
-int 0x80
+    mov edx, 1  
+    mov ecx, n
+    mov ebx, 1
+    mov eax, 4
+    int 0x80
 
-mov ecx, [buff]  ; помещение ecx в переменную для сохранения значения 
+    mov ecx, [buff]  
  
-loop fromStek    ; цикл
+    loop fromStek
 
 xor eax, eax
 xor ebx, ebx
@@ -95,30 +95,30 @@ mov ebx, 10;
  
 continueDIV1:
  
-div  ebx; деление нашего числа на 10 
-push edx; помещение остатка в стек(последней цифры числа)
-inc  ecx; повышение счетчика ecx(количества цифр)
+    div  ebx
+    push edx
+    inc  ecx
  
-xor edx, edx ; обнуляем регистр
+    xor edx, edx 
  
-cmp  eax, 0; проверка целой части числа(== 0?)
-jne continueDIV1; если не равно 0 то цикл
+    cmp  eax, 0
+    jne continueDIV1
  
 fromStek1:
-pop edx;
-mov [n]   , edx
-add [n]   , byte 48
-mov [buff], ecx ; запоминаем текущее количество итераций, так как , далее выводим символ и необходимо использовать регистр ecx
+    pop edx;
+    mov [n], edx
+    add [n], byte 48
+    mov [buff], ecx 
  
-mov edx, 1  ; вывод остатков(числа)
-mov ecx, n
-mov ebx, 1
-mov eax, 4
-int 0x80
+    mov edx, 1  
+    mov ecx, n
+    mov ebx, 1
+    mov eax, 4
+    int 0x80
 
-mov ecx, [buff]  ; помещение ecx в переменную для сохранения значения 
+    mov ecx, [buff]
  
-loop fromStek1    ; цикл
+    loop fromStek1
 
 
 mov eax, 1
