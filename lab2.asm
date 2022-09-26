@@ -4,53 +4,63 @@ global _start
 
 _start:
 
-    mov eax, [x]
-    mov ebx, [y]
-    
+    mov eax, [x] 
     cmp eax, 0
-    jl l1
-    cmp ebx, 0
-    jl l1
-    jmp no
-    l1:
-    mul eax
-    xor edx, edx
-    xchg eax, ebx
-    mul eax
-    xor edx, edx
-    add eax, ebx
-    cmp eax, 4
-    jg l2
-    jmp no
-    l2:
+    jle L1
+    ;if (x>0 && y>0) NO else L1
+    mov eax, [y] 
+    cmp eax, 0
+    jle L1
+    
+    jmp NO
+    
+    L1:
     mov eax, [x]
-    mov ebx, [y]
+    imul eax
+    mov ebx, eax
+    mov eax, [y]
+    imul eax
+    add eax, ebx
+    
+    cmp eax, 4 ;if (x*x+y*y < 4) NO else L2
+    jge L2
+    
+    jmp NO
+    
+    L2:
+    mov eax, [x]
+    cmp eax, 2 ;if
+    jg L3
+    
+    cmp eax, -2
+    jl L3
+    
+    mov eax, [y]
     cmp eax, 2
-    jge l3
-    cmp eax, a
-    jle l3
-    cmp ebx, 2
-    jge l3
-    cmp ebx, a
-    jle l3
-    jmp yes
-    l3:
-    jmp no
+    jg L3
     
-    no:
+    cmp eax, -2
+    jl L3
     
-    mov     ecx, msg1
-    mov     edx, len1
+    jmp YES
+    
+    L3:
+    jmp NO
+    
+    YES:
+    
+    mov     ecx, msgYes
+    mov     edx, lenYes
     mov     ebx, 1
     mov     eax, 4
     int     0x80
     
     jmp exit
     
-    yes:
+    NO:
     
-    mov     ecx, msg
-    mov     edx, len
+    mov     ecx, msgNo
+    mov     edx, lenNo
     mov     ebx, 1
     mov     eax, 4
     int     0x80
@@ -61,10 +71,9 @@ _start:
     int     0x80
 
 section .data
-    x dw 2
-    y dw 0
-    a dw -2
-    msg db  "Yes"
-    len equ $ - msg
-    msg1 db  "No"
-    len1 equ $ - msg1
+    x dd 3
+    y dd 0
+    msgYes db  "Yes"
+    lenYes equ $ - msgYes
+    msgNo db  "No"
+    lenNo equ $ - msgNo
