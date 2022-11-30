@@ -1,113 +1,65 @@
+section .text
+
 global _start 
 
-section .data 
-a dd 0 
-k dd 0 
-buff dd 0 
-msg db "НЕКОРРЕКТНЫЙ ВВОД" 
-len equ $ - msg 
-msg1 db "ПЕРЕПОЛНЕНИЕ" 
-len1 equ $ - msg1 
-
-section .bss 
-strA resb 255 
-
-section .text 
-
-_start: 
-
-mov eax, 3      ; ВВОД ЧИСЛА a и k 
-mov ebx, 0 
-mov ecx, strA 
-mov edx, 255 
-int 0x80 
-
-xor eax,eax        ; ОЧИСТКА РЕГИСТРОВ 
-xor ebx,ebx 
-xor edi,edi 
-xor edx,edx 
-
-mov edi,strA ;заносим адрес на первый элемент в регистр edi 
-jo OVER ;проверка на переполнение 
-
-mov ecx, 10  ; в ecx 10 
-
-L1: ;цикл превращения строки в число 
-
-mov bl, [edi] ; занесение в регистр значения элемента массива 
-inc edi ; переход на следующий элемент 
-
-cmp bl, '0'; проверка на ввод именно цифр 
-jl NEXT 
-
-cmp bl, '9' 
-jg NEXT 
-
-sub bl, '0' 
-
-mul ecx  ; умножение eax на ecx  
-jo OVER  ; проверка на переполнение 
-
-add eax, ebx  ; сложение eax и ebx 
-mov [a], eax ; занесение вводимого числа n из eax 
-
-jmp L1; цикл перевода (ввода) строки 
-
-NEXT: 
-
-cmp ebx ,' '; окончание ввода n 
-je VD 
-
-jmp ERROR;если введены не цифры, то переход на ошибку 
-
-VD: 
-
-xor eax, eax 
-xor edx, edx 
-xor ebx, ebx 
-
-L2: 
-
-mov bl, [edi] ; занесение в регистр значения элемента массива 
-inc edi ; переход на следующий элемент 
-
-cmp bl, '0'; проверка на ввод именно цифр 
-jl NEXT1 
-
-cmp bl, '9' 
-jg NEXT1 
-
-sub bl, '0' 
-
-mul ecx  ; умножение eax на ecx  
-jo OVER  ; проверка на переполнение 
-
-add eax, ebx  ; сложение eax и ebx 
-mov [k], eax ; занесение вводимого числа m из eax 
-
-jmp L2; цикл перевода (ввода) строки 
-
-NEXT1: 
-
-cmp ebx ,0xA; окончание строки 
-je VD1 
-
-jmp ERROR;если введены не цифры, то переход на ошибку 
-
-VD1: 
+_start:
 
 mov eax, 0  ; начальное значение eax  
 mov ecx, [a]  ; занесение a и k в регистры для работы с ними 
 mov edx, [k] 
 
-cmp ecx, 1    ; если n=1, то результат будет равняться «1» 
+cmp edx, 0 ; если k < 0, то некорректный ввод
+jl ERROR
+
+cmp edx, 1    ; если k=1, то результат будет равен n 
+je One1
+
+cmp ecx, 0 ; если a < 0, то результат будет зависеть от четности степени k
+jl Minus
+
+cmp ecx, 1    ; если a=1, то результат будет равняться «1» 
 je One 
 
-cmp edx, 1    ; если m=1, то результат будет равен n 
-je One1 
-
-cmp edx, 0    ; если m=0, то результат будет равен 1 
+cmp edx, 0    ; если k=0, то результат будет равен 1 
 je One 
+
+jmp Miss ; если нет отрицательных и частных случаев то переходим к основному циклу
+
+Minus: ; обработка отрицательного а
+
+xor eax, eax
+xor ebx, ebx
+xor ecx, ecx
+xor edx, edx
+
+mov eax, [k] ; проверка четности k, при четном k минус у а исчезает, иначе - остается
+mov ebx, 2
+div ebx
+cmp edx, 0
+je EvenOrNot
+
+mov edx, 1    ; вывод знака минуса
+mov ecx, minus
+mov ebx, 1 
+mov eax, 4 
+int 0x80 
+
+EvenOrNot: ; превращение отрицательного а в положительное после вывода знака минуса если необходимо
+
+xor eax, eax
+xor ebx, ebx
+xor ecx, ecx
+xor edx, edx
+
+mov eax, [a]
+mov ebx, -1
+mul ebx
+mov [a], eax
+mov eax, 0
+mov ecx, [a]
+mov edx, [k]
+
+Miss:
 
 Cycle2:         ; 2-ой цикл возведения в степень 
 
@@ -135,8 +87,24 @@ mov eax, 1 ; результат 1
 jmp ende       ; прыжок на end 
 
 One1: 
+mov ecx, [a] ; обработка частного случая при k = 1 при отрицательном а
+cmp ecx, 0
+jl MinusRes
 
 mov eax, [a]  ; результат a' 
+jmp ende
+
+MinusRes:
+
+mov edx, 1 
+mov ecx, minus
+mov ebx, 1 
+mov eax, 4 
+int 0x80 
+
+mov eax, [a]
+mov ebx, -1
+mul ebx
 
 ende: 
 
@@ -201,4 +169,14 @@ int 0x80
 end:;конец 
 
 mov eax, 1 
-int 0x80 
+int 0x80
+
+section .data 
+a dd -3
+k dd 4
+minus dd '-'
+buff dd 0 
+msg db "НЕКОРРЕКТНЫЙ ВВОД" 
+len equ $ - msg 
+msg1 db "ПЕРЕПОЛНЕНИЕ" 
+len1 equ $ - msg1 
